@@ -30,9 +30,14 @@ export default function Mapa() {
   return (
     <MapContainer center={[-23.71, -46.20]} zoom={13} style={{ height: "100%", width: "100%" }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      
       {postes.map((poste, idx) => {
+        // Validação para evitar erros
+        if (!poste.coordenadas || !poste.coordenadas.includes(",")) return null;
+
         const [lat, lon] = poste.coordenadas.split(",").map(Number);
         const color = getColor(poste.empresa || "");
+
         return (
           <Marker
             key={idx}
@@ -47,6 +52,7 @@ export default function Mapa() {
           </Marker>
         );
       })}
+
       {selecionados.length > 1 && (
         <Polyline positions={selecionados} color="blue" />
       )}
