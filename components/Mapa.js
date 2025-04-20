@@ -34,7 +34,12 @@ export default function Mapa() {
         const [lat, lon] = poste.coordenadas.split(",").map(Number);
         const color = getColor(poste.empresa || "");
         return (
-          <Marker key={idx} position={[lat, lon]} icon={customIcon(color)} eventHandlers={{ click: () => handleClick([lat, lon]) }}>
+          <Marker
+            key={idx}
+            position={[lat, lon]}
+            icon={customIcon(color)}
+            eventHandlers={{ click: () => handleClick([lat, lon]) }}
+          >
             <Popup>
               <strong>ID:</strong> {poste.id_poste}<br />
               <strong>Empresas:</strong> {poste.empresa}
@@ -42,7 +47,9 @@ export default function Mapa() {
           </Marker>
         );
       })}
-      {selecionados.length > 1 && <Polyline positions={selecionados} color="blue" />}
+      {selecionados.length > 1 && (
+        <Polyline positions={selecionados} color="blue" />
+      )}
     </MapContainer>
   );
 }
