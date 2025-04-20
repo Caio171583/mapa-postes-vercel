@@ -1,6 +1,19 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import { useEffect, useState } from "react";
 import L from "leaflet";
+
+// Força o mapa a se ajustar corretamente ao tamanho após renderização
+function ForceResize() {
+  const map = useMap();
+
+  useEffect(() => {
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 500); // Pequeno delay para garantir que o DOM esteja renderizado
+  }, [map]);
+
+  return null;
+}
 
 export default function Mapa() {
   const [postes, setPostes] = useState([]);
@@ -9,7 +22,8 @@ export default function Mapa() {
   useEffect(() => {
     fetch("/api/postes")
       .then(res => res.json())
-      .then(setPostes);
+      .then(setPostes)
+      .catch(err => console.error("Erro ao carregar postes:", err));
   }, []);
 
   const handleClick = (poste) => {
@@ -29,10 +43,10 @@ export default function Mapa() {
 
   return (
     <MapContainer center={[-23.71, -46.20]} zoom={13} style={{ height: "100%", width: "100%" }}>
+      <ForceResize />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       
       {postes.map((poste, idx) => {
-        // Validação para evitar erros
         if (!poste.coordenadas || !poste.coordenadas.includes(",")) return null;
 
         const [lat, lon] = poste.coordenadas.split(",").map(Number);
