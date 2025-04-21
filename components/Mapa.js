@@ -1,16 +1,6 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import { useEffect, useState } from "react";
 import L from "leaflet";
-
-function AtualizarMapa() {
-  const map = useMap();
-  useEffect(() => {
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 500); // Pequeno delay ajuda o layout
-  }, [map]);
-  return null;
-}
 
 export default function Mapa() {
   const [postes, setPostes] = useState([]);
@@ -19,7 +9,16 @@ export default function Mapa() {
   useEffect(() => {
     fetch("/api/postes")
       .then(res => res.json())
-      .then(setPostes);
+      .then(data => {
+        // Filtra registros válidos com coordenadas no formato correto
+        const filtrados = data.filter(p =>
+          typeof p.coordenadas === "string" &&
+          p.coordenadas.includes(",") &&
+          !isNaN(parseFloat(p.coordenadas.split(",")[0])) &&
+          !isNaN(parseFloat(p.coordenadas.split(",")[1]))
+        );
+        setPostes(filtrados);
+      });
   }, []);
 
   const handleClick = (poste) => {
@@ -27,8 +26,8 @@ export default function Mapa() {
   };
 
   const getColor = (empresas) => {
-    const count = empresas?.split(",").length || 0;
-    return count > 5 ? "red" : "green";
+    const count = (empresas?.split(",").length) || 0;
+    return count > 1 ? "red" : "green";
   };
 
   const customIcon = (color) =>
@@ -38,11 +37,10 @@ export default function Mapa() {
     });
 
   return (
-    <MapContainer center={[-23.55, -46.63]} zoom={12} style={{ height: "100vh", width: "100vw" }}>
-      <AtualizarMapa />
+    <MapContainer center={[-23.72, -45.86]} zoom={13} style={{ height: "100vh", width: "100%" }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {Array.isArray(postes) && postes.map((poste, idx) => {
-        const [lat, lon] = poste.coordenadas?.split(",").map(Number);
+      {postes.map((poste, idx) => {
+        const [lat, lon] = poste.coordenadas.split(",").map(Number);
         const color = getColor(poste.empresa || "");
         return (
           <Marker
@@ -53,7 +51,9 @@ export default function Mapa() {
           >
             <Popup>
               <strong>ID:</strong> {poste.id_poste}<br />
-              <strong>Empresas:</strong> {poste.empresa}
+              <strong>Empresa:</strong> {poste.empresa}<br />
+              <strong>Resumo:</strong> {poste.resumo}<br />
+              <strong>Município:</strong> {poste.nome_municipio}
             </Popup>
           </Marker>
         );
