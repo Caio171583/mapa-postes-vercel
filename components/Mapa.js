@@ -8,44 +8,43 @@ export default function Mapa() {
 
   useEffect(() => {
     fetch("/api/postes")
-      .then(res => res.json())
-      .then(data => {
-        const filtrados = data.filter(p =>
-          typeof p.coordenadas === "string" &&
-          p.coordenadas.includes(",") &&
-          !isNaN(parseFloat(p.coordenadas.split(",")[0])) &&
-          !isNaN(parseFloat(p.coordenadas.split(",")[1]))
-        );
+      .then((res) => res.json())
+      .then((data) => {
+        const filtrados = data.filter((p) => {
+          if (typeof p.coordenadas !== "string") return false;
+          const [lat, lon] = p.coordenadas.split(",").map(Number);
+          return !isNaN(lat) && !isNaN(lon);
+        });
         setPostes(filtrados);
       });
   }, []);
 
-  const handleClick = (poste) => {
-    setSelecionados([...selecionados, poste]);
+  const handleClick = ([lat, lon]) => {
+    setSelecionados((prev) => [...prev, [lat, lon]]);
   };
 
   const getColor = (empresas) => {
-    const count = (empresas?.split(",").length) || 0;
+    const count = empresas?.split(",").length || 0;
     return count > 1 ? "red" : "green";
   };
 
   const customIcon = (color) =>
     new L.DivIcon({
       className: "custom-icon",
-      html: `<div style="background-color:${color};width:16px;height:16px;border-radius:50%"></div>`
+      html: `<div style="background-color:${color};width:16px;height:16px;border-radius:50%"></div>`,
     });
 
   return (
     <MapContainer
       center={[-23.72, -45.86]}
       zoom={13}
-      style={{ height: "100vh", width: "100vw" }} // ⬅️ Aqui o ajuste
-      scrollWheelZoom={true} // ⬅️ Permite zoom com rolagem
+      scrollWheelZoom={true}
+      style={{ height: "100vh", width: "100vw" }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {postes.map((poste, idx) => {
         const [lat, lon] = poste.coordenadas.split(",").map(Number);
-        const color = getColor(poste.empresa || "");
+        const color = getColor(poste.empresa);
         return (
           <Marker
             key={idx}
@@ -54,9 +53,12 @@ export default function Mapa() {
             eventHandlers={{ click: () => handleClick([lat, lon]) }}
           >
             <Popup>
-              <strong>ID:</strong> {poste.id_poste}<br />
-              <strong>Empresa:</strong> {poste.empresa}<br />
-              <strong>Resumo:</strong> {poste.resumo}<br />
+              <strong>ID:</strong> {poste.id_poste}
+              <br />
+              <strong>Empresa:</strong> {poste.empresa}
+              <br />
+              <strong>Resumo:</strong> {poste.resumo}
+              <br />
               <strong>Município:</strong> {poste.nome_municipio}
             </Popup>
           </Marker>
