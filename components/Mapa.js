@@ -1,4 +1,5 @@
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import { useEffect, useState } from "react";
 import L from "leaflet";
 
@@ -42,28 +43,29 @@ export default function Mapa() {
       style={{ height: "100vh", width: "100vw" }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {postes.map((poste, idx) => {
-        const [lat, lon] = poste.coordenadas.split(",").map(Number);
-        const color = getColor(poste.empresa);
-        return (
-          <Marker
-            key={idx}
-            position={[lat, lon]}
-            icon={customIcon(color)}
-            eventHandlers={{ click: () => handleClick([lat, lon]) }}
-          >
-            <Popup>
-              <strong>ID:</strong> {poste.id_poste}
-              <br />
-              <strong>Empresa:</strong> {poste.empresa}
-              <br />
-              <strong>Resumo:</strong> {poste.resumo}
-              <br />
-              <strong>Município:</strong> {poste.nome_municipio}
-            </Popup>
-          </Marker>
-        );
-      })}
+
+      <MarkerClusterGroup chunkedLoading>
+        {postes.map((poste, idx) => {
+          const [lat, lon] = poste.coordenadas.split(",").map(Number);
+          const color = getColor(poste.empresa);
+          return (
+            <Marker
+              key={idx}
+              position={[lat, lon]}
+              icon={customIcon(color)}
+              eventHandlers={{ click: () => handleClick([lat, lon]) }}
+            >
+              <Popup>
+                <strong>ID:</strong> {poste.id_poste}<br />
+                <strong>Empresa:</strong> {poste.empresa}<br />
+                <strong>Resumo:</strong> {poste.resumo}<br />
+                <strong>Município:</strong> {poste.nome_municipio}
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MarkerClusterGroup>
+
       {selecionados.length > 1 && (
         <Polyline positions={selecionados} color="blue" />
       )}
