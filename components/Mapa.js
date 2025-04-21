@@ -10,7 +10,6 @@ export default function Mapa() {
     fetch("/api/postes")
       .then(res => res.json())
       .then(data => {
-        // Filtra registros válidos com coordenadas no formato correto
         const filtrados = data.filter(p =>
           typeof p.coordenadas === "string" &&
           p.coordenadas.includes(",") &&
@@ -37,7 +36,12 @@ export default function Mapa() {
     });
 
   return (
-    <MapContainer center={[-23.72, -45.86]} zoom={13} style={{ height: "100vh", width: "100%" }}>
+    <MapContainer
+      center={[-23.72, -45.86]}
+      zoom={13}
+      style={{ height: "100vh", width: "100vw" }} // ⬅️ Aqui o ajuste
+      scrollWheelZoom={true} // ⬅️ Permite zoom com rolagem
+    >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {postes.map((poste, idx) => {
         const [lat, lon] = poste.coordenadas.split(",").map(Number);
