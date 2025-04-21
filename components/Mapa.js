@@ -1,16 +1,16 @@
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import L from "leaflet";
 
-// Força o redimensionamento correto após montar
+// Força o mapa a redimensionar corretamente
 function ForceResize() {
   const map = useMap();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setTimeout(() => {
-      map.invalidateSize(); // ajusta internamente o Leaflet
-      window.dispatchEvent(new Event("resize")); // força evento no navegador
-    }, 1000); // tempo suficiente pra garantir renderização
+      map.invalidateSize();
+      window.dispatchEvent(new Event("resize"));
+    }, 300); // tempo suficiente pra renderizar antes
   }, [map]);
 
   return null;
@@ -43,10 +43,14 @@ export default function Mapa() {
     });
 
   return (
-    <MapContainer center={[-23.71, -46.20]} zoom={13} style={{ height: "100%", width: "100%" }}>
+    <MapContainer
+      center={[-23.71, -46.20]}
+      zoom={13}
+      style={{ height: "100vh", width: "100vw" }}
+    >
       <ForceResize />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      
+
       {postes.map((poste, idx) => {
         if (!poste.coordenadas || !poste.coordenadas.includes(",")) return null;
 
