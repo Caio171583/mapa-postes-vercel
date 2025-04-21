@@ -2,14 +2,15 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-
 import { useEffect, useState } from "react";
 import L from "leaflet";
 
-// Força ajuste de tamanho após renderização
+// Força o redimensionamento correto após montar
 function ForceResize() {
   const map = useMap();
 
   useEffect(() => {
     setTimeout(() => {
-      map.invalidateSize();
-    }, 1000); // Delay maior para garantir renderização
+      map.invalidateSize(); // ajusta internamente o Leaflet
+      window.dispatchEvent(new Event("resize")); // força evento no navegador
+    }, 1000); // tempo suficiente pra garantir renderização
   }, [map]);
 
   return null;
