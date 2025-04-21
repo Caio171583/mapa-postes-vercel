@@ -1,18 +1,14 @@
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import L from "leaflet";
 
-// Força o mapa a redimensionar corretamente
-function ForceResize() {
+function AtualizarMapa() {
   const map = useMap();
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     setTimeout(() => {
       map.invalidateSize();
-      window.dispatchEvent(new Event("resize"));
-    }, 300); // tempo suficiente pra renderizar antes
+    }, 500); // Pequeno delay ajuda o layout
   }, [map]);
-
   return null;
 }
 
@@ -23,8 +19,7 @@ export default function Mapa() {
   useEffect(() => {
     fetch("/api/postes")
       .then(res => res.json())
-      .then(setPostes)
-      .catch(err => console.error("Erro ao carregar postes:", err));
+      .then(setPostes);
   }, []);
 
   const handleClick = (poste) => {
@@ -43,20 +38,12 @@ export default function Mapa() {
     });
 
   return (
-    <MapContainer
-      center={[-23.71, -46.20]}
-      zoom={13}
-      style={{ height: "100vh", width: "100vw" }}
-    >
-      <ForceResize />
+    <MapContainer center={[-23.55, -46.63]} zoom={12} style={{ height: "100vh", width: "100vw" }}>
+      <AtualizarMapa />
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
-      {postes.map((poste, idx) => {
-        if (!poste.coordenadas || !poste.coordenadas.includes(",")) return null;
-
-        const [lat, lon] = poste.coordenadas.split(",").map(Number);
+      {Array.isArray(postes) && postes.map((poste, idx) => {
+        const [lat, lon] = poste.coordenadas?.split(",").map(Number);
         const color = getColor(poste.empresa || "");
-
         return (
           <Marker
             key={idx}
@@ -71,7 +58,6 @@ export default function Mapa() {
           </Marker>
         );
       })}
-
       {selecionados.length > 1 && (
         <Polyline positions={selecionados} color="blue" />
       )}
