@@ -5,3 +5,10 @@ body,
   margin: 0;
   padding: 0;
 }
+
+.leaflet-container {
+  height: 100vh;
+  width: 100vw;
+  z-index: 0;
+  touch-action: auto; /* 👈 Adicionado */
+}
